@@ -1,7 +1,7 @@
 mkdir -p ~/.config
 
-ln -sf ~/.dotfiles/.vimrc ~/.vimrc
-ln -sf ~/.dotfiles/nvim ~/.config/nvim
-ln -sf ~/.dotfiles/kitty ~/.config/kitty
+ln -sf ~/.dotflies/.vimrc ~/.vimrc
+ln -sf ~/.dotflies/nvim ~/.config/nvim
+ln -sf ~/.dotflies/kitty.conf ~/.config/kitty/kitty.conf
 
 echo "let them fly."
