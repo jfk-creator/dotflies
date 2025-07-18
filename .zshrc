@@ -5,3 +5,13 @@ comp() {
     clear
     clang "$1.c" -o "$1" && "./$1"
 }
+
+# Alias
+alias ll='ls -lha -a'
+alias reload='source ~/.zshrc'
+
+# Oh-My-Zsh
+export ZSH="$HOME/.oh-my-zsh"
+ZSH_THEME="bira"
+plugins=(git)
+source $ZSH/oh-my-zsh.sh
