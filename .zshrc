@@ -7,7 +7,7 @@ comp() {
 }
 
 # Alias
-alias ll='ls -lha -a'
+alias ll='ls -lha'
 alias reload='source ~/.zshrc'
 
 # Oh-My-Zsh
