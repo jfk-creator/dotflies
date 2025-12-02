@@ -12,13 +12,36 @@ if not vim.loop.fs_stat(lazypath) then
     lazypath,
   })
 end
+
 vim.opt.rtp:prepend(lazypath)
--- === END BOOTSTRAP LAZY.NVIM ===
--- leader key to spacebar
-vim.g.mapleader = ' '
+-- === END BOOTSTRAP LAWZY.NVIM ===
 
 -- escape terminal mode with ESC:
 vim.keymap.set('t', '<Esc>', "<C-\\><C-n><C-w>h",{silent = true})
+-- Lua
+-- 1. Create a global variable to track the state
+vim.g.cmp_enabled = true
+
+-- 2. Define the toggle function
+local function toggle_cmp()
+  vim.g.cmp_enabled = not vim.g.cmp_enabled -- Toggle the state
+  
+  -- Re-configure nvim-cmp with the new enabled state
+  require('cmp').setup({
+    enabled = vim.g.cmp_enabled
+  })
+
+  -- Display a notification
+  vim.notify(
+    "nvim-cmp: " .. (vim.g.cmp_enabled and "ENABLED" or "DISABLED"),
+    vim.log.levels.INFO
+  )
+end
+
+-- 3. Set the keymap in Normal and Insert mode (e.g., <leader>tc for 'Toggle Completion')
+
+vim.keymap.set('i', '<C-t>', toggle_cmp, { desc = 'Toggle Auto Completion (nvim-cmp)' })
+vim.keymap.set('n', '<C-t>', toggle_cmp, { desc = 'Toggle Auto Completion (nvim-cmp)' })
 
 -- vim settings:
 vim.o.compatible = false
@@ -70,13 +93,13 @@ require('lazy').setup({
            
                 {"<C-LeftMouse>", "<Cmd>MultipleCursorsMouseAddDelete<CR>", mode = {"n", "i"}, desc = "Add or remove cursor"},
             
-                {"<Leader>m", "<Cmd>MultipleCursorsAddVisualArea<CR>", mode = {"x"}, desc = "Add cursors to the lines of the visual area"},
+                {"<C-i>", "<Cmd>MultipleCursorsAddVisualArea<CR>", mode = {"x"}, desc = "Add cursors to the lines of the visual area"},
             
-                {"<Leader>a", "<Cmd>MultipleCursorsAddMatches<CR>", mode = {"n", "x"}, desc = "Add cursors to cword"},
+                {"<C-a>", "<Cmd>MultipleCursorsAddMatches<CR>", mode = {"n", "x"}, desc = "Add cursors to cword"},
                 {"<Leader>A", "<Cmd>MultipleCursorsAddMatchesV<CR>", mode = {"n", "x"}, desc = "Add cursors to cword in previous area"},
             
-                {"<Leader>d", "<Cmd>MultipleCursorsAddJumpNextMatch<CR>", mode = {"n", "x"}, desc = "Add cursor and jump to next cword"},
-                {"<Leader>D", "<Cmd>MultipleCursorsJumpNextMatch<CR>", mode = {"n", "x"}, desc = "Jump to next cword"},
+                {"<C-d>", "<Cmd>MultipleCursorsAddJumpNextMatch<CR>", mode = {"n", "x"}, desc = "Add cursor and jump to next cword"},
+                {"<C-e>", "<Cmd>MultipleCursorsJumpNextMatch<CR>", mode = {"n", "x", "i"}, desc = "Jump to next cword"},
             
             {"<Leader>l", "<Cmd>MultipleCursorsLock<CR>", mode = {"n", "x"}, desc = "Lock virtual cursors"},
         },
@@ -114,7 +137,6 @@ require('lazy').setup({
         -- Optional: create a keymap for convenient LSP commands
         vim.keymap.set('n', 'gd', vim.lsp.buf.definition, { desc = "Go to definition" })
         vim.keymap.set('n', 'K', vim.lsp.buf.hover, { desc = "Hover information" })
-        -- Add more keymaps as you learn them
       end
     },
 -- CMP config:
