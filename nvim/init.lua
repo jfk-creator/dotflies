@@ -40,15 +40,15 @@ end
 
 -- Open Preview on Leader-p
 vim.api.nvim_create_autocmd("FileType", {
-  pattern = "typst",
-  callback = function()
-    -- Assuming your maplocalleader is set (default is usually backslash \)
-    -- Press \p to open preview
-    vim.keymap.set('n', '<leader>p', ':TypstPreview<CR>', { 
-      buffer = true, 
-      desc = "Open Typst Preview" 
-    })
-  end,
+    pattern = "typst",
+    callback = function()
+        -- Assuming your maplocalleader is set (default is usually backslash \)
+        -- Press \p to open preview
+        vim.keymap.set('n', '<leader>p', ':TypstPreview<CR>', { 
+            buffer = true, 
+            desc = "Open Typst Preview" 
+        })
+    end,
 })
 
 -- Toggle Completion
@@ -212,7 +212,7 @@ require('lazy').setup({
     },
     {
         'nvim-telescope/telescope.nvim', tag = 'v0.2.0',
-        dependencies = { 'nvim-lua/plenary.nvim' }
+        dependencies = { 'nvim-lua/plenary.nvim' },
     },
     -- Treesitter is a modern syntax highlighter
     {
@@ -237,7 +237,57 @@ require('lazy').setup({
             })
         end,
     },
+  -- 1. Add this BEFORE image.nvim to handle Lua dependencies
+    {
+        "vhyrro/luarocks.nvim",
+        priority = 1001, -- this plugin needs to run before anything else
+        opts = {
+            rocks = { "magick" }, -- This automatically installs the magick Lua rock
+        },
+    },
 
+    -- 2. Updated Image viewer config
+    {
+        "3rd/image.nvim",
+        dependencies = { "luarocks.nvim" }, 
+        config = function()
+            require("image").setup({
+                -- backend = "kitty",  <-- COMMENTED OUT. Let it auto-detect!
+                -- Only use "kitty" if you are actually using the Kitty Terminal.
+                -- If you use WezTerm, iTerm2, or Ghostty, let this be nil.
+                backend = nil, 
+                
+                integrations = {
+                    markdown = {
+                        enabled = true,
+                        clear_in_insert_mode = false,
+                        download_remote_images = true,
+                        only_render_image_at_cursor = false,
+                        filetypes = { "markdown", "vimwiki", "html" },
+                    },
+                    neorg = {
+                        enabled = true,
+                        clear_in_insert_mode = false,
+                        download_remote_images = true,
+                        only_render_image_at_cursor = false,
+                        filetypes = { "norg" },
+                    },
+                    typst = {
+                        enabled = true,
+                        filetypes = { "typst" },
+                    },
+                },
+                max_width = nil,
+                max_height = nil,
+                max_width_window_percentage = nil,
+                max_height_window_percentage = 50,
+                window_overlap_clear_enabled = false, 
+                editor_only_render_when_focused = false, 
+                tmux_show_only_in_active_window = false, 
+                hijack_file_patterns = { "*.png", "*.jpg", "*.jpeg", "*.gif", "*.webp", "*.avif", "*.svg" }, 
+            })
+        end
+    },
 })
 -- telescope
 
@@ -246,3 +296,34 @@ vim.keymap.set('n', '<C-f>f', builtin.find_files, { desc = 'Telescope find files
 vim.keymap.set('n', '<C-f>g', builtin.live_grep, { desc = 'Telescope live grep' })
 vim.keymap.set('n', '<C-f>b', builtin.buffers, { desc = 'Telescope buffers' })
 vim.keymap.set('n', '<C-f>h', builtin.help_tags, { desc = 'Telescope help tags' })
+
+local telescope = require("telescope")
+local previewers = require("telescope.previewers")
+
+-- 1. DEFINE THIS FIRST (Required for the 'else' block to work)
+local previewers = require('telescope.previewers')
+
+local new_maker = function(filepath, bufnr, opts)
+    filepath = vim.fn.expand(filepath)
+
+    local image_extensions = { "png", "jpg", "jpeg", "gif", "webp" }
+    local split_path = vim.split(filepath:lower(), ".", { plain = true })
+    local extension = split_path[#split_path]
+
+    if vim.tbl_contains(image_extensions, extension) then
+        vim.api.nvim_set_option_value("filetype", "markdown", { buf = bufnr })
+        vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, { "![image](" .. filepath .. ")" })
+    else
+        -- If not an image, use the default previewer
+        previewers.buffer_previewer_maker(filepath, bufnr, opts)
+    end
+end -- FIX: "end" must be lowercase
+
+require('telescope').setup {
+    defaults = {
+        buffer_previewer_maker = new_maker,
+        preview = {
+            filesize_limit = 0.1, -- limits previews to files smaller than 0.1MB (100KB)
+        },
+    }
+}
