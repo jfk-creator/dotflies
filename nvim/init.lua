@@ -327,3 +327,18 @@ require('telescope').setup {
         },
     }
 }
+local highlight_groups = {
+    "Normal",
+    "NormalNC",
+    "LineNr",
+    "Folded",
+    "NonText",
+    "SpecialKey",
+    "VertSplit",
+    "SignColumn",
+    "EndOfBuffer",
+}
+
+for _, group in ipairs(highlight_groups) do
+    vim.api.nvim_set_hl(0, group, { bg = "none", ctermbg = "none" })
+end
